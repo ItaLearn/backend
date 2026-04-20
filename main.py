@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 import models
@@ -10,9 +10,11 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Plataforma de Estudos API")
 
 class CriarUsuario(BaseModel):
-    nome: str
+    nome: str = Field(min_length=3, max_length=100)
+    nome_usuario: str = Field(min_length=3, max_length=15)
     email: str
     senha: str
+    profissao: str
 
 class FazerLogin(BaseModel):
     email: str
@@ -26,17 +28,27 @@ class CriarMinicurso(BaseModel):
 
 @app.post("/usuarios")
 def criar_usuario(usuario: CriarUsuario, db: Session = Depends(get_db)):
-    usuario_existente = db.query(models.Usuario).filter(models.Usuario.email == usuario.email).first()
-    if usuario_existente:
-        raise HTTPException(status_code=400, detail="E-mail já cadastrado")
+    email_existente = db.query(models.Usuario).filter(models.Usuario.email == usuario.email).first()
+    if email_existente:
+        raise HTTPException(status_code=400, detail="E-mail já cadastrado!")
+        
+    user_existente = db.query(models.Usuario).filter(models.Usuario.nome_usuario == usuario.nome_usuario).first()
+    if user_existente:
+        raise HTTPException(status_code=400, detail="Nome de usuário já está em uso!")
     
-    novo_usuario = models.Usuario(nome=usuario.nome, email=usuario.email, senha=usuario.senha)
+    novo_usuario = models.Usuario(
+        nome=usuario.nome, 
+        nome_usuario=usuario.nome_usuario,
+        email=usuario.email, 
+        senha=usuario.senha,
+        profissao=usuario.profissao
+    )
     
     db.add(novo_usuario)
     db.commit()
     db.refresh(novo_usuario) 
     
-    return {"mensagem": f"Usuário {novo_usuario.nome} criado com sucesso!", "id": novo_usuario.id}
+    return {"mensagem": f"Usuário {novo_usuario.nome_usuario} criado com sucesso!", "id": novo_usuario.id}
 
 @app.post("/minicursos")
 def criar_minicurso(minicurso: CriarMinicurso, db: Session = Depends(get_db)):
