@@ -5,9 +5,14 @@ from sqlalchemy.orm import Session
 import models
 from database import engine, get_db
 
+
+from CreateAula import router as aula_router
+
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Plataforma de Estudos API")
+
+app.include_router(aula_router)
 
 class CriarUsuario(BaseModel):
     nome: str = Field(min_length=3, max_length=100)
@@ -25,6 +30,11 @@ class CriarMinicurso(BaseModel):
     descricao: str
     autor_email: str
 
+class CriarAula(BaseModel):
+    id_minicurso: int
+    titulo: str
+    conteudo: str
+    ordem: int
 
 @app.post("/usuarios")
 def criar_usuario(usuario: CriarUsuario, db: Session = Depends(get_db)):

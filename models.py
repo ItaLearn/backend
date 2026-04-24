@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 from database import Base
 
 class Usuario(Base):
@@ -18,3 +19,16 @@ class Minicurso(Base):
     titulo = Column(String, index=True)
     descricao = Column(String)
     autor_email = Column(String)
+
+    aulas = relationship("Aula", back_populates="minicurso")
+
+class Aula(Base):
+    __tablename__ = "aulas"
+
+    id = Column(Integer, primary_key=True, index=True)
+    id_minicurso = Column(Integer, ForeignKey("minicursos.id"))
+    titulo = Column(String, index=True)
+    conteudo = Column(String)
+    ordem =Column(Integer)
+
+    minicurso = relationship("Minicurso", back_populates="aulas")
