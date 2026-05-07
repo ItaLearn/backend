@@ -25,6 +25,10 @@ class CriarMinicurso(BaseModel):
     descricao: str
     autor_email: str
 
+class AtualizarMinicurso(BaseModel):
+    titulo: str
+    descricao: str
+
 
 @app.post("/usuarios")
 def criar_usuario(usuario: CriarUsuario, db: Session = Depends(get_db)):
@@ -50,6 +54,15 @@ def criar_usuario(usuario: CriarUsuario, db: Session = Depends(get_db)):
     
     return {"mensagem": f"Usuário {novo_usuario.nome_usuario} criado com sucesso!", "id": novo_usuario.id}
 
+@app.post("/login")
+def login(dados: FazerLogin, db: Session = Depends(get_db)):
+    usuario = db.query(models.Usuario).filter(models.Usuario.email == dados.email).first()
+    
+    if not usuario or usuario.senha != dados.senha:
+        raise HTTPException(status_code=401, detail="E-mail ou senha incorretos")
+        
+    return {"mensagem": "Login aprovado", "usuario": usuario.nome_usuario}
+
 @app.post("/minicursos")
 def criar_minicurso(minicurso: CriarMinicurso, db: Session = Depends(get_db)):
     novo_minicurso = models.Minicurso(titulo=minicurso.titulo, descricao=minicurso.descricao, autor_email=minicurso.autor_email)
@@ -64,3 +77,28 @@ def criar_minicurso(minicurso: CriarMinicurso, db: Session = Depends(get_db)):
 def listar_minicursos(db: Session = Depends(get_db)):
     minicursos = db.query(models.Minicurso).all()
     return {"minicursos_disponiveis": minicursos}
+
+@app.put("/minicursos/{minicurso_id}")
+def atualizar_minicurso(minicurso_id: int, dados: AtualizarMinicurso, db: Session = Depends(get_db)):
+    minicurso_db = db.query(models.Minicurso).filter(models.Minicurso.id == minicurso_id).first()
+    
+    if not minicurso_db:
+        raise HTTPException(status_code=404, detail="Minicurso não encontrado")
+    
+    minicurso_db.titulo = dados.titulo
+    minicurso_db.descricao = dados.descricao
+    
+    db.commit()
+    db.refresh(minicurso_db)
+    return {"mensagem": "Minicurso atualizado com sucesso!", "curso": minicurso_db}
+
+@app.delete("/minicursos/{minicurso_id}")
+def apagar_minicurso(minicurso_id: int, db: Session = Depends(get_db)):
+    minicurso_db = db.query(models.Minicurso).filter(models.Minicurso.id == minicurso_id).first()
+    
+    if not minicurso_db:
+        raise HTTPException(status_code=404, detail="Minicurso não encontrado")
+    
+    db.delete(minicurso_db)
+    db.commit()
+    return {"mensagem": "Minicurso removido com sucesso!"}
