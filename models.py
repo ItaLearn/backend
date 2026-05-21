@@ -32,3 +32,13 @@ class Aula(Base):
     ordem =Column(Integer)
 
     minicurso = relationship("Minicurso", back_populates="aulas")
+
+class Avaliacao(Base):
+    __tablename__ = "avaliacoes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nota = Column(Integer)
+    comentario = Column(String)
+
+    minicurso_id = Column(Integer, ForeignKey("minicursos.id"))
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))

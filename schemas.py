@@ -25,3 +25,8 @@ class CriarAula(BaseModel):
     titulo: str
     conteudo: str
     ordem: int
+
+class CriarAvaliacao(BaseModel):
+    nota: int = Field(ge=1, le=5)
+    comentario: str
+    usuario_id: int
