@@ -17,7 +17,7 @@ def listar_aulas(id_minicurso: int, db: Session = Depends(get_db)):
     return aulas
 
 
-@router.get("/{id_aula}")
+@router.get("/aulas/{id_aula}")
 def buscar_aula(id_aula: int, db: Session = Depends(get_db)):
     aula = db.query(models.Aula).filter(models.Aula.id == id_aula).first()
     if not aula:
