@@ -1,6 +1,9 @@
 # ambiente virtual
 venv/
 
+# variáveis de ambiente
+.env
+
 # arquivo do banco
 database.py
 
