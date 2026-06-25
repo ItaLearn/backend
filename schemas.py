@@ -1,23 +1,23 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 class CriarUsuario(BaseModel):
     nome: str = Field(min_length=3, max_length=100)
     nome_usuario: str = Field(min_length=3, max_length=15)
     email: str
-    senha: str
+    senha: str = Field(..., min_length=6, max_length=15)
     profissao: str
 
 class FazerLogin(BaseModel):
     email: str
-    senha: str
+    senha: str = Field(..., min_length=6, max_length=15)
 
 class SolicitarRedefinicaoSenha(BaseModel):
     email: str
 
 class RedefinirSenha(BaseModel):
     token: str
-    nova_senha: str
+    nova_senha: str = Field(..., min_length=6, max_length=15)
 
 class CriarMinicurso(BaseModel):
     titulo: str
@@ -37,3 +37,16 @@ class CriarAvaliacao(BaseModel):
 
 class CriarFavorito(BaseModel):
     usuario_id: int
+
+class CriarComentario(BaseModel):
+    conteudo: str
+    comentario_pai_id: Optional[int] = None
+
+class PerfilUsuario(BaseModel):
+    nome: str
+    nome_usuario: str
+    email: str
+    profissao: str
+    progresso_minicursos: list
+    avaliacoes: list
+    comentarios: list
