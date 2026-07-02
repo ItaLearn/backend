@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime, Boolean, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Table, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -83,6 +83,16 @@ class ProgressoAula(Base):
     usuario = relationship("Usuario", back_populates="progressos")
     aula = relationship("Aula", back_populates="progressos")
     minicurso = relationship("Minicurso", back_populates="progressos")
+
+class HistoricoAula(Base):
+    __tablename__ = "Historico_aula"
+
+    Usuario_id = Column(Integer, ForeignKey("usuarios.id"), primary_key=True)
+    conteudo_id = Column(Integer, ForeignKey("conteudo_id"), primary_key=True)
+    concluido = Column(Boolean, default=False)
+    ultima_visualizacao = Column(DateTime)
+    progresso = Column(Float, default=0)
+    conclusao = Column(DateTime, nullable=True)
 
 class Avaliacao(Base):
     __tablename__ = "avaliacoes"

@@ -2,12 +2,13 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import get_db
 from schemas import CriarFavorito
+from auth import get_usuario_logado
 import models
 
 router = APIRouter()
 
 @router.post("/minicursos/{minicurso_id}/favoritar")
-def favoritar_minicurso(minicurso_id: int, favorito: CriarFavorito, db: Session = Depends(get_db)):
+def favoritar_minicurso(minicurso_id: int, favorito: CriarFavorito, db: Session = Depends(get_db), usuario_logado: models.Usuario = Depends(get_usuario_logado)):
     usuario = db.query(models.Usuario).filter(models.Usuario.id == favorito.usuario_id).first()
 
     if not usuario:
@@ -19,13 +20,13 @@ def favoritar_minicurso(minicurso_id: int, favorito: CriarFavorito, db: Session 
         raise HTTPException(status_code=404, detail="Minicurso não encontrado")
 
     favorito_existente = db.query(models.Favorito).filter(
-        models.Favorito.usuario_id == favorito.usuario_id,
+        models.Favorito.usuario_id == usuario_logado.id,
         models.Favorito.minicurso_id == minicurso_id).first()
 
     if favorito_existente:
         raise HTTPException(status_code=400, detail="Minicurso já está nos favoritos")
 
-    novo_favorito = models.Favorito(usuario_id=favorito.usuario_id, minicurso_id=minicurso_id)
+    novo_favorito = models.Favorito(usuario_id=usuario_logado.id, minicurso_id=minicurso_id)
 
     db.add(novo_favorito)
     db.commit()

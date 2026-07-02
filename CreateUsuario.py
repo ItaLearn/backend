@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import get_db
 from schemas import CriarUsuario
+from auth import gerar_hash_senha
 import models
 
 router = APIRouter()
@@ -16,11 +17,13 @@ def criar_usuario(usuario: CriarUsuario, db: Session = Depends(get_db)):
     if user_existente:
         raise HTTPException(status_code=400, detail="Nome de usuário já está em uso!")
     
+    senha_hash = gerar_hash_senha(usuario.senha)
+    
     novo_usuario = models.Usuario(
         nome=usuario.nome, 
         nome_usuario=usuario.nome_usuario,
         email=usuario.email, 
-        senha=usuario.senha,
+        senha=senha_hash,
         profissao=usuario.profissao
     )
     
